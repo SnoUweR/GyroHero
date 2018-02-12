@@ -16,21 +16,6 @@ COLLATE utf8_general_ci;
 --
 USE gyro_hero;
 
---
--- Описание для таблицы orders
---
-DROP TABLE IF EXISTS orders;
-CREATE TABLE orders (
-  OrderID INT(11) UNSIGNED NOT NULL,
-  Total DECIMAL(10, 0) DEFAULT NULL,
-  BeginTime DATETIME DEFAULT NULL,
-  ClientName VARCHAR(255) DEFAULT NULL,
-  PRIMARY KEY (OrderID)
-)
-ENGINE = INNODB
-CHARACTER SET utf8
-COLLATE utf8_general_ci
-ROW_FORMAT = DYNAMIC;
 
 --
 -- Описание для таблицы workers
@@ -48,6 +33,25 @@ AUTO_INCREMENT = 1
 CHARACTER SET utf8
 COLLATE utf8_general_ci
 ROW_FORMAT = DYNAMIC;
+
+--
+-- Описание для таблицы orders
+--
+DROP TABLE IF EXISTS orders;
+CREATE TABLE orders (
+  OrderID INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  Total DECIMAL(10, 0) DEFAULT NULL,
+  BeginTime DATETIME DEFAULT NULL,
+  ClientName VARCHAR(255) DEFAULT NULL,
+  WorkerID int(11) UNSIGNED NOT NULL,
+  PRIMARY KEY (OrderID),
+  CONSTRAINT FK_orders_WorkerID FOREIGN KEY (WorkerID)
+  REFERENCES gyro_hero.workers (WorkerID) ON DELETE NO ACTION ON UPDATE RESTRICT
+)
+  ENGINE = INNODB
+  CHARACTER SET utf8
+  COLLATE utf8_general_ci
+  ROW_FORMAT = DYNAMIC;
 
 -- 
 -- Создание соответствующего пользователя для бд
