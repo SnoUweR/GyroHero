@@ -14,9 +14,9 @@ class Order
     {
 
         $settings = array(
-            'server' => '127.0.0.1',
+            'server' => 'localhost',
             'username' => 'gyrohero',
-            'password' => 'somepassword',
+            'password' => 'some_password',
             'db' => 'gyro_hero',
             'port' => 3306,
             'charset' => 'utf8',
@@ -90,17 +90,17 @@ class Order
 
     }
 
-    public function insert_order($worker_id, $total, $begin_time, $client_name)
+    public function insert_order($worker_id, $total, $client_name)
     {
         $status = "200";
 
         $stmt = $this->_SQL->prepare(
-            "INSERT INTO orders (WorkerID, Total, BeginTime, ClientName) VALUES (?, ?, ?, ?)"
+            "INSERT INTO orders (WorkerID, Total, ClientName) VALUES (?, ?, ?)"
         );
 
         if ($stmt)
         {
-            $stmt->bind_param('idss', $worker_id, $total, $begin_time, $client_name);
+            $stmt->bind_param('ids', $worker_id, $total, $client_name);
             $stmt->execute();
 
             if ($stmt->affected_rows < 1)

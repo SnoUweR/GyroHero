@@ -30,9 +30,8 @@ function handle_orders_base($method)
             //TODO: в дальнейшем тут нужны проверки на аргументы
             $worker_id = $_POST["worker_id"];
             $total = $_POST["total"];
-            $begin_time = $_POST["begin_time"];
             $client_name = $_POST["client_name"];
-            return_json($api->insert_order($worker_id, $total, $begin_time, $client_name));
+            return_json($api->insert_order($worker_id, $total, $client_name));
             break;
         case 'GET':
             return_json($api->get_orders());
