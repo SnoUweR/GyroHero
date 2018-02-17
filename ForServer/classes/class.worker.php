@@ -2,11 +2,11 @@
 /**
  * Created by PhpStorm.
  * User: SnoUweR
- * Date: 12.02.2018
- * Time: 10:29
+ * Date: 17.02.2018
+ * Time: 10:51
  */
 
-class Order
+class GyroWorker
 {
     private $_SQL;
 
@@ -21,7 +21,7 @@ class Order
             'port' => 3306,
             'charset' => 'utf8',
         );
-        //$this->_SQL = new simpleMysqli($settings);
+
         $this->_SQL =
             mysqli_connect($settings['server'], $settings['username'], $settings['password'], $settings['db']);
 
@@ -40,27 +40,26 @@ class Order
         }
     }
 
-    public function get_order($order_id)
+    public function get_element($worker_id)
     {
         $data = [];
         $status = "200";
         $stmt = $this->_SQL->prepare(
-            "SELECT Total, BeginTime, ClientName, WorkerID FROM orders WHERE OrderID = ?"
+            "SELECT FirstName, SecondName, MiddleName FROM workers WHERE WorkerID = ?"
         );
         if ($stmt) {
 
-            $stmt->bind_param('i', $order_id);
+            $stmt->bind_param('i', $worker_id);
             $stmt->execute();
-            $stmt->bind_result($total, $begin_time, $client_name, $worker_id);
+            $stmt->bind_result($firstName, $secondName, $middleName);
             if ($stmt->fetch()) {
                 $data = [
-                    "Total" => $total,
-                    "BeginTime" => $begin_time,
-                    "ClientName" => $client_name,
-                    "WorkerID" => $worker_id,
+                    "FirstName" => $firstName,
+                    "SecondName" => $secondName,
+                    "MiddleName" => $middleName,
                 ];
             } else {
-                $data = "No order with passed OrderID";
+                $data = "No worker with passed WorkerID";
                 $status = "404";
             }
             $stmt->close();
@@ -72,10 +71,10 @@ class Order
         return $this->return_json_result($data, $status);
     }
 
-    public function get_orders()
+    public function get_all()
     {
         $result = $this->_SQL->query(
-            "SELECT * FROM orders", MYSQLI_USE_RESULT
+            "SELECT * FROM workers", MYSQLI_USE_RESULT
         );
         if ($result) {
             $res_array = $result->fetch_all(MYSQLI_ASSOC);
@@ -90,34 +89,35 @@ class Order
 
     }
 
-    public function insert_order($worker_id, $total, $client_name)
+    public function insert($first_name, $second_name, $middle_name)
     {
         $status = "200";
-
         $stmt = $this->_SQL->prepare(
-            "INSERT INTO orders (WorkerID, Total, ClientName) VALUES (?, ?, ?)"
+            "INSERT INTO workers (FirstName, SecondName, MiddleName) VALUES (?, ?, ?)"
         );
 
         if ($stmt)
         {
-            $stmt->bind_param('ids', $worker_id, $total, $client_name);
+            $stmt->bind_param('sss', $first_name, $second_name, $middle_name);
             $stmt->execute();
 
             if ($stmt->affected_rows < 1)
             {
                 $status = "406";
             }
-            $order_id = $stmt->insert_id;
+
+            $worker_id = $stmt->insert_id;
             $stmt->close();
-            return $this->return_json_result(array("OrderID" => $order_id), $status);
+            return $this->return_json_result(array("WorkerID" => $worker_id), $status);
         }
         else
         {
             return $this->return_json_result([], "500");
         }
+
     }
 
-    
+
     private function return_json_result($data = [], $status = "200")
     {
         $res_array = [
