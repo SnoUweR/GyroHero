@@ -127,6 +127,26 @@ class GyroWorker
 
     }
 
+    private function get_hash_by_id($worker_id)
+    {
+        $stmt = $this->_SQL->prepare(
+            "SELECT Hash FROM workers WHERE WorkerID = ?"
+        );
+        if ($stmt) {
+
+            $stmt->bind_param('i', $worker_id);
+            $stmt->execute();
+            $stmt->bind_result($hash);
+            if (!$stmt->fetch()) {
+                $hash = null;
+            }
+            $stmt->close();
+
+            return $hash;
+        }
+        return null;
+    }
+
     public function insert($name, $location)
     {
         $status = "200";
@@ -146,7 +166,13 @@ class GyroWorker
 
             $worker_id = $stmt->insert_id;
             $stmt->close();
-            return $this->return_json_result(array("WorkerID" => $worker_id), $status);
+
+            $hash = $this->get_hash_by_id($worker_id);
+
+            return $this->return_json_result(array(
+                "WorkerID" => $worker_id,
+                "Hash" => $hash,
+            ), $status);
         }
         else
         {
