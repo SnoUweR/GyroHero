@@ -10,17 +10,8 @@ class Order
 {
     private $_SQL;
 
-    public function __construct()
+    public function __construct($settings)
     {
-
-        $settings = array(
-            'server' => 'localhost',
-            'username' => 'gyrohero',
-            'password' => 'some_password',
-            'db' => 'gyro_hero',
-            'port' => 3306,
-            'charset' => 'utf8',
-        );
         //$this->_SQL = new simpleMysqli($settings);
         $this->_SQL =
             mysqli_connect($settings['server'], $settings['username'], $settings['password'], $settings['db']);
@@ -90,9 +81,14 @@ class Order
 
     }
 
-    public function insert_order($worker_id, $total, $client_name)
+    public function insert_order($hash, $total, $client_name)
     {
         $status = "200";
+
+        $worker_id = GyroWorker::get_workerid_by_hash($this->_SQL, $hash);
+        if ($worker_id < 0) {
+            return $this->return_json_result([], "401");
+        }
 
         $stmt = $this->_SQL->prepare(
             "INSERT INTO orders (WorkerID, Total, ClientName) VALUES (?, ?, ?)"

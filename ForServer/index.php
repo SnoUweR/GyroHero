@@ -8,6 +8,16 @@ $paths = explode("/", $_GET['_url']);
 array_shift($paths);
 $resource = array_shift($paths);
 
+
+$settings = array(
+    'server' => 'localhost',
+    'username' => 'gyrohero',
+    'password' => 'somepassword',
+    'db' => 'gyro_hero',
+    'port' => 3306,
+    'charset' => 'utf8',
+);
+
 if ($resource == 'orders') {
     $name = array_shift($paths);
 
@@ -34,15 +44,15 @@ else  {
 // Workers
 function handle_workers_base($method)
 {
-    $api = new GyroWorker();
+    global $settings;
+    $api = new GyroWorker($settings);
 
     switch ($method) {
         case 'POST':
             //TODO: в дальнейшем тут нужны проверки на аргументы
-            $first_name = $_POST["first_name"];
-            $second_name = $_POST["second_name"];
-            $middle_name = $_POST["middle_name"];
-            return_json($api->insert($first_name, $second_name, $middle_name));
+            $name = $_POST["name"];
+            $location = $_POST["location"];
+            return_json($api->insert($name, $location));
             break;
         case 'GET':
             return_json($api->get_all());
@@ -56,7 +66,8 @@ function handle_workers_base($method)
 
 function handle_workers_name($method, $arg)
 {
-    $api = new GyroWorker();
+    global $settings;
+    $api = new GyroWorker($settings);
 
     switch($method) {
         case 'POST':
@@ -81,15 +92,15 @@ function handle_workers_name($method, $arg)
 // Orders
 function handle_orders_base($method)
 {
-    $api = new Order();
-
+    global $settings;
+    $api = new Order($settings);
     switch ($method) {
         case 'POST':
             //TODO: в дальнейшем тут нужны проверки на аргументы
-            $worker_id = $_POST["worker_id"];
+            $hash = $_POST["hash"];
             $total = $_POST["total"];
             $client_name = $_POST["client_name"];
-            return_json($api->insert_order($worker_id, $total, $client_name));
+            return_json($api->insert_order($hash, $total, $client_name));
             break;
         case 'GET':
             return_json($api->get_orders());
@@ -103,7 +114,8 @@ function handle_orders_base($method)
 
 function handle_orders_name($method, $arg)
 {
-    $api = new Order();
+    global $settings;
+    $api = new Order($settings);
 
     switch($method) {
         case 'POST':

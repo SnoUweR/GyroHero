@@ -22,17 +22,18 @@ USE gyro_hero;
 --
 DROP TABLE IF EXISTS workers;
 CREATE TABLE workers (
-  WorkerID INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  FirstName VARCHAR(255) DEFAULT NULL,
-  SecondName VARCHAR(255) DEFAULT NULL,
-  MiddleName VARCHAR(255) DEFAULT NULL,
+  WorkerID int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  Name varchar(255) NOT NULL,
+  Location varchar(255) DEFAULT NULL,
+  Hash varchar(255) DEFAULT NULL,
   PRIMARY KEY (WorkerID)
 )
-ENGINE = INNODB
-AUTO_INCREMENT = 1
-CHARACTER SET utf8
-COLLATE utf8_general_ci
-ROW_FORMAT = DYNAMIC;
+  ENGINE = INNODB
+  AUTO_INCREMENT = 4
+  AVG_ROW_LENGTH = 5461
+  CHARACTER SET utf8
+  COLLATE utf8_general_ci
+  ROW_FORMAT = DYNAMIC;
 
 --
 -- Описание для таблицы orders
@@ -58,3 +59,13 @@ CREATE TABLE orders (
 --
 CREATE USER 'gyrohero'@'%' IDENTIFIED BY 'somepassword';
 GRANT ALL PRIVILEGES ON gyro_hero.* TO 'gyrohero'@'%';
+
+CREATE
+  DEFINER = 'gyrohero'@'%'
+TRIGGER gyro_hero.trigger_hash
+BEFORE INSERT
+  ON gyro_hero.workers
+FOR EACH ROW
+  BEGIN
+    SET NEW.Hash = MD5(CONCAT(NEW.WorkerID, NEW.Name));
+  END
