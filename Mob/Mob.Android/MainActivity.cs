@@ -6,6 +6,9 @@ using Android.Content;
 using System.Globalization;
 using System.Threading;
 using Xamarin.Forms;
+using Firebase.Messaging;
+using Firebase.Iid;
+using Android.Util;
 
 namespace Mob.Droid
 {

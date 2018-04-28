@@ -8,6 +8,8 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
+using Mob.Droid.Push;
+using Firebase.Iid;
 
 namespace Mob
 {
@@ -785,11 +787,18 @@ namespace Mob
                         await Navigation.PushAsync(p);
                     };
                 ///
+                var btnTestFirebase = new Button { Text = "Firebase", BackgroundColor = Color.White, TextColor = Color.Green };
+                btnTestFirebase.Clicked += async (sender, args) =>
+                {
+                    var serviceFirb = new MyFirebaseIIDService();
+                    serviceFirb.ShowToken();
+                };
+                ///
                 StackLayout viewLayout = new StackLayout()
                 {
                     Orientation = StackOrientation.Vertical,
                     Padding = new Thickness(5, 10, 5, 0),
-                    Children = { listView, btn }
+                    Children = { listView, btnTestFirebase, btn }
                 };
                 Content = viewLayout;
             }

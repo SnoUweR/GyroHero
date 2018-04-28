@@ -294,3 +294,4 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 /ControlCenter/bin
+Mob/Mob.Android/google-services.json
