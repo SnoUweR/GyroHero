@@ -1,0 +1,25 @@
+{
+    "tasks": [
+        {
+            "label": "echo",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-Wall",
+                "-pthread",
+                "-z",
+                "-relro",
+                "-lcurl",
+                "-lcurlpp",
+                "daemon.cpp",
+                "-o",
+                "daemon"
+            ],
+            
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
