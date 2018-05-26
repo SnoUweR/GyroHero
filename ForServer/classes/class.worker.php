@@ -5,6 +5,7 @@
  * Date: 17.02.2018
  * Time: 10:51
  */
+include_once "class.error_codes.php";
 
 class GyroWorker
 {
@@ -82,7 +83,7 @@ class GyroWorker
     public function get_element($worker_id)
     {
         $data = [];
-        $status = "200";
+        $status = HtmlErrorCode::OK;
         $stmt = $this->_SQL->prepare(
             "SELECT Name, Location FROM workers WHERE WorkerID = ?"
         );
@@ -98,13 +99,13 @@ class GyroWorker
                 ];
             } else {
                 $data = "No worker with passed WorkerID";
-                $status = "404";
+                $status = HtmlErrorCode::NOT_FOUND;
             }
             $stmt->close();
         }
         else
         {
-            return $this->return_json_result("Internal Error", "500");
+            return $this->return_json_result("Internal Error", HtmlErrorCode::INTERNAL_SERVER_ERROR);
         }
         return $this->return_json_result($data, $status);
     }
@@ -121,7 +122,7 @@ class GyroWorker
         }
         else
         {
-            return $this->return_json_result([], "500");
+            return $this->return_json_result([], HtmlErrorCode::INTERNAL_SERVER_ERROR);
         }
 
 
@@ -149,7 +150,7 @@ class GyroWorker
 
     public function insert($name, $location)
     {
-        $status = "200";
+        $status = HtmlErrorCode::OK;
         $stmt = $this->_SQL->prepare(
             "INSERT INTO workers (Name, Location) VALUES (?, ?)"
         );
@@ -161,7 +162,7 @@ class GyroWorker
 
             if ($stmt->affected_rows < 1)
             {
-                $status = "406";
+                $status = HtmlErrorCode::NOT_ACCEPTABLE;
             }
 
             $worker_id = $stmt->insert_id;
@@ -176,13 +177,67 @@ class GyroWorker
         }
         else
         {
-            return $this->return_json_result([], "500");
+            return $this->return_json_result([], HtmlErrorCode::INTERNAL_SERVER_ERROR);
         }
 
     }
 
+    public function get_device_token($worker_id)
+    {
+        if ($worker_id < 0) {
+            throw new InvalidArgumentException();
+        }
 
-    private function return_json_result($data = [], $status = "200")
+        $stmt = $this->_SQL->prepare(
+            "SELECT DeviceToken FROM workers WHERE WorkerID = ?"
+        );
+
+        $device_token = null;
+        if ($stmt) {
+
+            $stmt->bind_param('i', $worker_id);
+            $stmt->execute();
+            $stmt->bind_result($device_token);
+            if (!$stmt->fetch()) {
+
+            }
+            $stmt->close();
+        }
+        return $device_token;
+    }
+
+    public function update_device_token($hash, $device_token)
+    {
+        $status = HtmlErrorCode::OK;
+
+        $worker_id = GyroWorker::get_workerid_by_hash($this->_SQL, $hash);
+        if ($worker_id < 0) {
+            return $this->return_json_result([], HtmlErrorCode::UNAUTHORIZED);
+        }
+
+        $stmt = $this->_SQL->prepare(
+            "UPDATE workers SET DeviceToken = ? WHERE WorkerID = ?"
+        );
+
+        if ($stmt)
+        {
+            $stmt->bind_param('si', $device_token, $worker_id);
+            $stmt->execute();
+
+            if ($stmt->affected_rows < 1)
+            {
+                $status = HtmlErrorCode::NOT_ACCEPTABLE;
+            }
+            $stmt->close();
+            return $this->return_json_result([], $status);
+        }
+        else
+        {
+            return $this->return_json_result([], HtmlErrorCode::INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private function return_json_result($data = [], $status = HtmlErrorCode::OK)
     {
         $res_array = [
             "status" => $status,

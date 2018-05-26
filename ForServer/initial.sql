@@ -67,5 +67,5 @@ BEFORE INSERT
   ON gyro_hero.workers
 FOR EACH ROW
   BEGIN
-    SET NEW.Hash = MD5(CONCAT(NEW.WorkerID, NEW.Name));
+    SET NEW.Hash = MD5(CONCAT(RAND(), NEW.Name));
   END

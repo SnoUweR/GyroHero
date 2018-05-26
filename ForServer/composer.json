@@ -1,0 +1,17 @@
+{
+  "name": "gyrohero_server",
+  "description": "Server for GyroHero App",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Paul Bezruk"
+    },
+    {
+      "name": "Vladislav Kovalev"
+    }
+  ],
+  "require": {
+    "sngrl/php-firebase-cloud-messaging": "dev-master"
+  }
+}
