@@ -1,15 +1,15 @@
 ﻿using Mob.Dto;
+using Mob.Requests;
 using Newtonsoft.Json;
 using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
-using Mob.Droid.Push;
-using Firebase.Iid;
 
 namespace Mob
 {
@@ -267,14 +267,20 @@ namespace Mob
 
         private async Task<int> StoreRent()
         {
-            return await Task.Run(() =>
+            return await Task.Run(async () =>
             {
                 var stored = new StoredRent();
                 stored.Rent = JsonConvert.SerializeObject(_rent);
                 stored.Date = DateTime.Now;
                 stored.Type = _rent.RentPrice.Vehicle;
+                GyroServer.SendOrder(_rent);
                 return App.Database.StoreRent(stored);              
             });
+        }
+
+        private async Task SendRentToServer()
+        {
+
         }
 
         public string GetRentInfo()
@@ -787,18 +793,11 @@ namespace Mob
                         await Navigation.PushAsync(p);
                     };
                 ///
-                var btnTestFirebase = new Button { Text = "Firebase", BackgroundColor = Color.White, TextColor = Color.Green };
-                btnTestFirebase.Clicked += async (sender, args) =>
-                {
-                    var serviceFirb = new MyFirebaseIIDService();
-                    serviceFirb.ShowToken();
-                };
-                ///
                 StackLayout viewLayout = new StackLayout()
                 {
                     Orientation = StackOrientation.Vertical,
                     Padding = new Thickness(5, 10, 5, 0),
-                    Children = { listView, btnTestFirebase, btn }
+                    Children = { listView, btn }
                 };
                 Content = viewLayout;
             }

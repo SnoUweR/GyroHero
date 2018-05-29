@@ -80,7 +80,8 @@ namespace Mob.Requests
                 var values = new Dictionary<string, string>
                 {
                    { "name", App.Database.GetSettingsByName("UserName").Vlaue},
-                   { "location", App.Database.GetSettingsByName("Location").Vlaue}
+                   { "location", App.Database.GetSettingsByName("Location").Vlaue},
+                    { "device_token", App.Database.GetSettingsByName("DeviceToken").Vlaue},
                 };
 
                 var content = new FormUrlEncodedContent(values);

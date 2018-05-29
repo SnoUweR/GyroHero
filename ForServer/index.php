@@ -10,11 +10,14 @@ $paths = explode("/", $_GET['_url']);
 array_shift($paths);
 $resource = array_shift($paths);
 
+$service_settings = array(
+    'api_key' => 'Odka21349lsldaDe',
+);
 
 $settings = array(
-    'server' => 'localhost',
+    'server' => '193.124.181.25',
     'username' => 'gyrohero',
-    'password' => 'somepassword',
+    'password' => 'n16vLGG7dG4JK75hENIF',
     'db' => 'gyro_hero',
     'port' => 3306,
     'charset' => 'utf8',
@@ -70,20 +73,60 @@ else  {
 function handle_push_base($method)
 {
     global $service_settings;
-    $api_key = $_POST["api_key"];
-    if ($api_key !== $service_settings['api_key'])
-    {
-        header('HTTP/1.1 401 Unauthorized');
-        header('Your API Key is incorrect');
-        return;
+    global $settings;
+
+    switch($method) {
+        case 'POST':
+
+            if (!isset($_POST['api_key']))
+            {
+                header('HTTP/1.1 406 Not acceptable');
+                header('Api Key should set');
+                break;
+            }
+
+            $api_key = $_POST["api_key"];
+            if ($api_key !== $service_settings['api_key'])
+            {
+                header('HTTP/1.1 401 Unauthorized');
+                header('Your API Key is incorrect');
+                return;
+            }
+
+            if (!isset($_POST['title']))
+            {
+                header('HTTP/1.1 406 Not acceptable');
+                header('Title should set');
+                break;
+            }
+            $title = $_POST['title'];
+
+            if (!isset($_POST['body']))
+            {
+                header('HTTP/1.1 406 Not acceptable');
+                header('Body should set');
+                break;
+            }
+            $body = $_POST['body'];
+
+            $api = new GyroWorker($settings);
+            $all_tokens = $api->get_all_device_tokens();
+            foreach ($all_tokens as $token)
+            {
+                var_dump($token);
+                $push = new PushNotify();
+                $push->SendMessage($token["DeviceToken"], $title, $body);
+
+            }
+
+            header('HTTP/1.1 200 OK');
+            break;
+
+        default:
+            header('HTTP/1.1 405 Method Not Allowed');
+            header('Allow: POST');
+            break;
     }
-
-    $device_token = $_POST["device_token"];
-    $push = new PushNotify();
-    $push->SendMessage(
-        "cAYw63EEpEI:APA91bEKfuO5LI9bsMoAWxtSAobWtyCtdkwTAl2ePI4_bHf6YrzIsdqByAeZ2n2AwQyOuOyGDFnMxxPeqmRj_E-HCae050Px5GU-rl_hAfbv9y8-Z5v8608a_sAQIjFe8oJ6lhsv7XvS", "Привет", "Куку");
-
-
 }
 
 function handle_push_workerid($method, $worker_id)
@@ -144,7 +187,8 @@ function handle_workers_base($method)
             //TODO: в дальнейшем тут нужны проверки на аргументы
             $name = $_POST["name"];
             $location = $_POST["location"];
-            return_json($api->insert($name, $location));
+            $device_token = $_POST["device_token"];
+            return_json($api->insert($name, $location, $device_token));
             break;
         case 'GET':
             return_json($api->get_all());

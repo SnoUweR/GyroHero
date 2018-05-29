@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Mob.Requests;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
 using System.Text;
 using System.Text.RegularExpressions;
+using Java.Lang;
+using Mob.Droid.Push;
 using Xamarin.Forms;
 
 namespace Mob
@@ -49,6 +52,7 @@ namespace Mob
                 _userSettings.Add("UserName", App.Database.GetSettingsByName("UserName"));
                 _userSettings.Add("ReportEmail", App.Database.GetSettingsByName("ReportEmail"));
                 _userSettings.Add("Location", App.Database.GetSettingsByName("Location"));
+                _userSettings.Add("DeviceToken", App.Database.GetSettingsByName("DeviceToken"));
                 #region UserNameControls
                 _userImg = new Image
                 {
@@ -83,6 +87,7 @@ namespace Mob
                     Opacity = 0.2,
                     Source = "edit.png",
                     HorizontalOptions = LayoutOptions.End,
+                    IsEnabled = _userSettings["UserName"] != null ? false : true,
                     VerticalOptions = LayoutOptions.Center
                 };
                 _userEditImg.GestureRecognizers.Add(new TapGestureRecognizer
@@ -242,6 +247,7 @@ namespace Mob
                     Opacity = 0.2,
                     Source = "edit.png",
                     HorizontalOptions = LayoutOptions.End,
+                    IsEnabled = _userSettings["Location"] != null ? false : true,
                     VerticalOptions = LayoutOptions.Center
                 };
                 _locationEditImg.GestureRecognizers.Add(new TapGestureRecognizer
@@ -294,12 +300,26 @@ namespace Mob
                 _resetImg = new Image { Source = "settings.png", Scale = 0.5 };
                 _resetButton = new Button
                 {
-                    Text = "Сбросить данные",
+                    Text = "Отправить данные",
                     TextColor = Color.Red,
                     BackgroundColor = Color.Transparent,
                     HorizontalOptions = LayoutOptions.FillAndExpand,
-                    IsEnabled = false,
+                    IsEnabled = (_userSettings["Location"]?.Vlaue != null && _userSettings["UserName"]?.Vlaue != null) ? true : false,
                     Opacity = 0.5
+                };
+                _resetButton.Clicked += async (s, e) =>
+                {
+                    if (_userSettings["Location"]?.Vlaue != null && _userSettings["UserName"]?.Vlaue != null)
+                    {
+                        if (_userSettings["DeviceToken"]?.Vlaue == null)
+                        {
+                            var serviceFirb = new MyFirebaseIIDService();
+                            App.Database.SaveUserSettings(new UserSettings { Name = "DeviceToken", Vlaue = serviceFirb.GetToken() });
+                            _userSettings["DeviceToken"] = App.Database.GetSettingsByName("DeviceToken");
+                        }
+
+                        GyroServer.SendUserData();
+                    }
                 };
                 var resetLayout = new StackLayout
                 {
@@ -329,7 +349,7 @@ namespace Mob
                 }
                 };
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 App.Database.SaveError(new Mob.Dto.Error { Date = DateTime.Now, Invoker = this.GetType().Name, Message = ex.Message });
             }

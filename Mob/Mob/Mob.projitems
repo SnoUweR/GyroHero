@@ -20,6 +20,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PriceInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RentEnd.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RentInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Requests\GyroServer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StartBackgroundTask.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StatsPage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StoredRent.cs" />

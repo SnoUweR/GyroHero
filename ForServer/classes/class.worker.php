@@ -148,16 +148,16 @@ class GyroWorker
         return null;
     }
 
-    public function insert($name, $location)
+    public function insert($name, $location, $device_token)
     {
         $status = HtmlErrorCode::OK;
         $stmt = $this->_SQL->prepare(
-            "INSERT INTO workers (Name, Location) VALUES (?, ?)"
+            "INSERT INTO workers (Name, Location, DeviceToken) VALUES (?, ?, ?)"
         );
 
         if ($stmt)
         {
-            $stmt->bind_param('ss', $name, $location);
+            $stmt->bind_param('sss', $name, $location, $device_token);
             $stmt->execute();
 
             if ($stmt->affected_rows < 1)
@@ -180,6 +180,22 @@ class GyroWorker
             return $this->return_json_result([], HtmlErrorCode::INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    public function get_all_device_tokens()
+    {
+        $result = $this->_SQL->query(
+            "SELECT DeviceToken FROM workers WHERE DeviceToken IS NOT NULL", MYSQLI_USE_RESULT
+        );
+        if ($result) {
+            $res_array = $result->fetch_all(MYSQLI_ASSOC);
+            $result->free();
+            return $res_array;
+        }
+        else
+        {
+            return $this->return_json_result([], HtmlErrorCode::INTERNAL_SERVER_ERROR);
+        }
     }
 
     public function get_device_token($worker_id)
